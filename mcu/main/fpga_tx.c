@@ -85,6 +85,7 @@ void FPGA_TxTask(void *arg)
     FPGA_Tx_Resume();
 
     uint8_t TxBuffer[14] = {0};
+    uint32_t BootResends = 100;   // keep re-sending config until the FPGA is up
 
     while (1)
     {
@@ -104,6 +105,14 @@ void FPGA_TxTask(void *arg)
             pdFALSE, // Any bit will do
             pdMS_TO_TICKS(100)
         );
+
+        // if nothing asked to send (a timeout), push everything again
+        const EventBits_t kRequests = (EventBits_t)(kTxFlag_AllFlags & ~kTxFlag_Resume);
+        if (BootResends > 0 && (EventBits & kRequests) == 0)
+        {
+            BootResends--;
+            FPGA_Tx_SendAll();
+        }
 
         if ((EventBits & kTxFlag_WriteBrightness) == kTxFlag_WriteBrightness)
         {
