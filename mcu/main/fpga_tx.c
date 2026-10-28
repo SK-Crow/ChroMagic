@@ -103,7 +103,7 @@ void FPGA_TxTask(void *arg)
             (kTxFlag_WriteBrightness | kTxFlag_SetSysCtl | kTxFlag_RequestFWVer | kTxFlag_PokeButton | kTxFlag_SetPaletteStyle | kTxFlag_RequestBGPD),
             pdTRUE, // DO clear the flags to complete the request
             pdFALSE, // Any bit will do
-            pdMS_TO_TICKS(100)
+            pdMS_TO_TICKS(BootResends > 0 ? 30 : 100)
         );
 
         // if nothing asked to send (a timeout), push everything again
